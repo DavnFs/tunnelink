@@ -1,6 +1,6 @@
 use dashmap::DashMap;
-use tokio::sync::broadcast;
 use std::sync::Arc;
+use tokio::sync::broadcast;
 
 #[derive(Clone)]
 pub struct TunnelManager {
@@ -34,5 +34,34 @@ impl TunnelManager {
 
     pub fn is_active(&self, profile_id: &str) -> bool {
         self.active_tunnels.contains_key(profile_id)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn register_marks_tunnel_active_until_stop_sends_shutdown() {
+        let manager = TunnelManager::new();
+        let mut shutdown_rx = manager.register("profile-1");
+
+        assert!(manager.is_active("profile-1"));
+        manager
+            .stop("profile-1")
+            .expect("active tunnel can be stopped");
+        assert!(!manager.is_active("profile-1"));
+        assert!(shutdown_rx.try_recv().is_ok());
+    }
+
+    #[test]
+    fn stopping_unknown_tunnel_fails_loudly() {
+        let manager = TunnelManager::new();
+
+        let err = manager
+            .stop("missing-profile")
+            .expect_err("unknown tunnel should fail");
+
+        assert!(err.contains("missing-profile"));
     }
 }

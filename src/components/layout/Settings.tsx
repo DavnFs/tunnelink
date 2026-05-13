@@ -9,29 +9,41 @@ interface SettingsProps {
   onImportSuccess?: () => void;
 }
 
+type Theme = "dark" | "light" | "system";
+
+function getStoredTheme(): Theme {
+  if (typeof window === "undefined") return "dark";
+
+  const saved = localStorage.getItem("theme");
+  return saved === "light" || saved === "system" || saved === "dark"
+    ? saved
+    : "dark";
+}
+
+function applyTheme(theme: Theme) {
+  const isLight =
+    theme === "light" ||
+    (theme === "system" &&
+      !window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  if (isLight) {
+    document.documentElement.setAttribute("data-theme", "light");
+  } else {
+    document.documentElement.removeAttribute("data-theme");
+  }
+}
+
 export default function Settings({ onImportSuccess }: SettingsProps) {
-  const [theme, setTheme] = useState<"dark" | "light" | "system">("dark");
+  const [theme, setTheme] = useState<Theme>(getStoredTheme);
   const toast = useToast();
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme") as "dark" | "light" | "system" | null;
-    if (saved) setTheme(saved);
-  }, []);
+    applyTheme(theme);
+  }, [theme]);
 
-  const handleThemeChange = (newTheme: "dark" | "light" | "system") => {
+  const handleThemeChange = (newTheme: Theme) => {
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
-
-    const isLight =
-      newTheme === "light" ||
-      (newTheme === "system" &&
-        !window.matchMedia("(prefers-color-scheme: dark)").matches);
-
-    if (isLight) {
-      document.documentElement.setAttribute("data-theme", "light");
-    } else {
-      document.documentElement.removeAttribute("data-theme");
-    }
   };
 
   const handleExport = async () => {

@@ -1,6 +1,6 @@
+use async_trait::async_trait;
 use russh::client::Handler;
 use russh::keys::key::PublicKey;
-use async_trait::async_trait;
 
 #[derive(Clone)]
 pub struct ClientHandler;

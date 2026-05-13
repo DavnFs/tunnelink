@@ -1,10 +1,10 @@
 use russh::client::Config;
 use russh::keys::decode_secret_key;
 use std::sync::Arc;
-use tokio::sync::broadcast;
 use tauri::Emitter;
+use tokio::sync::broadcast;
 
-use crate::models::{ConnectionProfile, AuthMethod, TunnelState, TunnelStatus, ForwardKind};
+use crate::models::{AuthMethod, ConnectionProfile, ForwardKind, TunnelState, TunnelStatus};
 use crate::ssh::client::ClientHandler;
 use crate::ssh::forward::start_local_forward;
 
@@ -18,7 +18,7 @@ pub async fn start_ssh_session(
     mut shutdown_rx: broadcast::Receiver<()>,
 ) {
     let profile_id = profile.id.clone();
-    
+
     // Initial connecting state
     let mut current_status = TunnelStatus {
         profile_id: profile_id.clone(),
@@ -30,9 +30,7 @@ pub async fn start_ssh_session(
     emit_status(&app_handle, current_status.clone()).await;
 
     // Build configuration
-    let config = Arc::new(Config {
-        ..<_>::default()
-    });
+    let config = Arc::new(Config { ..<_>::default() });
 
     let addr = format!("{}:{}", profile.host, profile.port);
 
@@ -61,7 +59,9 @@ pub async fn start_ssh_session(
     let auth_res = match profile.auth_method {
         AuthMethod::Password => {
             if let Some(pwd) = profile.password_enc {
-                session.authenticate_password(profile.username.clone(), pwd).await
+                session
+                    .authenticate_password(profile.username.clone(), pwd)
+                    .await
             } else {
                 Err(russh::Error::SendError) // Should not happen, checked by command handler
             }
@@ -73,11 +73,17 @@ pub async fn start_ssh_session(
                         // We use russh_keys to parse the private key. For MVP, no passphrase support.
                         match decode_secret_key(&key_content, None) {
                             Ok(key_pair) => {
-                                session.authenticate_publickey(profile.username.clone(), Arc::new(key_pair)).await
+                                session
+                                    .authenticate_publickey(
+                                        profile.username.clone(),
+                                        Arc::new(key_pair),
+                                    )
+                                    .await
                             }
                             Err(e) => {
                                 current_status.state = TunnelState::Error;
-                                current_status.error_msg = Some(format!("Failed to parse SSH key: {}", e));
+                                current_status.error_msg =
+                                    Some(format!("Failed to parse SSH key: {}", e));
                                 emit_status(&app_handle, current_status).await;
                                 return;
                             }
@@ -85,7 +91,8 @@ pub async fn start_ssh_session(
                     }
                     Err(e) => {
                         current_status.state = TunnelState::Error;
-                        current_status.error_msg = Some(format!("Failed to read SSH key file: {}", e));
+                        current_status.error_msg =
+                            Some(format!("Failed to read SSH key file: {}", e));
                         emit_status(&app_handle, current_status).await;
                         return;
                     }
@@ -127,7 +134,10 @@ pub async fn start_ssh_session(
         if rule.auto_start && rule.kind == ForwardKind::Local {
             local_rules.push(rule);
         } else if rule.auto_start {
-            log::warn!("Only Local port forwarding is supported in this version. Skipping rule: {}", rule.label);
+            log::warn!(
+                "Only Local port forwarding is supported in this version. Skipping rule: {}",
+                rule.label
+            );
         }
     }
 
@@ -137,13 +147,20 @@ pub async fn start_ssh_session(
         let shutdown_rx_clone = shutdown_rx.resubscribe();
         let app_handle_clone = app_handle.clone();
         let profile_id_clone = profile_id.clone();
-        
+
         let handle = tokio::spawn(async move {
-            let _ = start_local_forward(rule, ssh_handle, shutdown_rx_clone, app_handle_clone, profile_id_clone).await;
+            let _ = start_local_forward(
+                rule,
+                ssh_handle,
+                shutdown_rx_clone,
+                app_handle_clone,
+                profile_id_clone,
+            )
+            .await;
         });
         join_handles.push(handle);
     }
-    
+
     current_status.active_rules = local_rules;
     emit_status(&app_handle, current_status.clone()).await;
 

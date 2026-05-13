@@ -112,3 +112,39 @@ impl CryptoKey {
 fn get_key_path() -> PathBuf {
     get_data_dir().join(KEY_FILENAME)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_key() -> CryptoKey {
+        CryptoKey {
+            key_bytes: [7u8; 32],
+        }
+    }
+
+    #[test]
+    fn encrypt_round_trip_recovers_original_password() {
+        let crypto = test_key();
+        let encrypted = crypto.encrypt("s3cret").expect("encryption works");
+
+        assert_ne!(encrypted, "s3cret");
+        assert_eq!(
+            crypto.decrypt(&encrypted).expect("decryption works"),
+            "s3cret"
+        );
+    }
+
+    #[test]
+    fn encrypt_uses_a_fresh_nonce_for_each_password_write() {
+        let crypto = test_key();
+        let first = crypto
+            .encrypt("same-password")
+            .expect("first encryption works");
+        let second = crypto
+            .encrypt("same-password")
+            .expect("second encryption works");
+
+        assert_ne!(first, second);
+    }
+}

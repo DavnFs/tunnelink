@@ -8,7 +8,11 @@ import ToastContainer from "./components/ui/Toast";
 import { useToast } from "./hooks/useToast";
 import { useProfiles } from "./hooks/useProfiles";
 import { useTunnels } from "./hooks/useTunnels";
-import type { CreateProfileRequest, UpdateProfileRequest } from "./types";
+import type {
+  CreateForwardRuleRequest,
+  CreateProfileRequest,
+  UpdateProfileRequest,
+} from "./types";
 
 function AppContent() {
   const toast = useToast();
@@ -70,7 +74,10 @@ function AppContent() {
     }
   };
 
-  const handleAddRuleWrapper = async (profileId: string, rule: any) => {
+  const handleAddRuleWrapper = async (
+    profileId: string,
+    rule: CreateForwardRuleRequest
+  ) => {
     try {
       await addForwardRule(profileId, rule);
       toast.success("Forward rule added");

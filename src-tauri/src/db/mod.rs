@@ -32,7 +32,7 @@ pub fn init_db() -> SqliteResult<Connection> {
     Ok(conn)
 }
 
-fn run_migrations(conn: &Connection) -> SqliteResult<()> {
+pub(crate) fn run_migrations(conn: &Connection) -> SqliteResult<()> {
     conn.execute_batch(
         "
         CREATE TABLE IF NOT EXISTS profiles (
@@ -109,8 +109,7 @@ pub fn get_all_profiles(conn: &Connection) -> Result<Vec<ConnectionProfile>, Str
     let profiles: Vec<ConnectionProfile> = stmt
         .query_map([], |row| {
             let tags_str: String = row.get(8)?;
-            let tags: Vec<String> =
-                serde_json::from_str(&tags_str).unwrap_or_default();
+            let tags: Vec<String> = serde_json::from_str(&tags_str).unwrap_or_default();
             let auth_str: String = row.get(5)?;
 
             Ok(ConnectionProfile {
@@ -152,8 +151,7 @@ pub fn get_profile_by_id(conn: &Connection, id: &str) -> Result<ConnectionProfil
     let mut profile = stmt
         .query_row(params![id], |row| {
             let tags_str: String = row.get(8)?;
-            let tags: Vec<String> =
-                serde_json::from_str(&tags_str).unwrap_or_default();
+            let tags: Vec<String> = serde_json::from_str(&tags_str).unwrap_or_default();
             let auth_str: String = row.get(5)?;
 
             Ok(ConnectionProfile {
@@ -297,10 +295,83 @@ pub fn insert_forward_rule(
 }
 
 pub fn delete_forward_rule(conn: &Connection, rule_id: &str) -> Result<(), String> {
-    conn.execute(
-        "DELETE FROM forward_rules WHERE id = ?1",
-        params![rule_id],
-    )
-    .map_err(|e| format!("Failed to delete forward rule: {}", e))?;
+    conn.execute("DELETE FROM forward_rules WHERE id = ?1", params![rule_id])
+        .map_err(|e| format!("Failed to delete forward rule: {}", e))?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn memory_conn() -> Connection {
+        let conn = Connection::open_in_memory().expect("in-memory DB opens");
+        conn.execute_batch("PRAGMA foreign_keys=ON;")
+            .expect("foreign keys can be enabled");
+        run_migrations(&conn).expect("schema can be created");
+        conn
+    }
+
+    fn profile_req() -> CreateProfileRequest {
+        CreateProfileRequest {
+            name: "Training GPU".to_string(),
+            host: "gpu.example.test".to_string(),
+            port: 22,
+            username: "davin".to_string(),
+            auth_method: AuthMethod::Password,
+            key_path: None,
+            password: None,
+            tags: vec!["gpu".to_string()],
+        }
+    }
+
+    fn rule_req() -> CreateForwardRuleRequest {
+        CreateForwardRuleRequest {
+            label: "Jupyter".to_string(),
+            kind: ForwardKind::Local,
+            local_port: 8888,
+            remote_host: "localhost".to_string(),
+            remote_port: 8888,
+            auto_start: true,
+        }
+    }
+
+    #[test]
+    fn update_without_password_preserves_existing_secret() {
+        let conn = memory_conn();
+        let profile = insert_profile(&conn, &profile_req(), Some("secret-v1".to_string()))
+            .expect("profile can be inserted");
+
+        let updated = update_profile(
+            &conn,
+            &UpdateProfileRequest {
+                id: profile.id,
+                name: "Renamed GPU".to_string(),
+                host: "gpu.example.test".to_string(),
+                port: 22,
+                username: "davin".to_string(),
+                auth_method: AuthMethod::Password,
+                key_path: None,
+                password: None,
+                tags: vec!["gpu".to_string(), "renamed".to_string()],
+            },
+            None,
+        )
+        .expect("profile can be updated");
+
+        assert_eq!(updated.password_enc, Some("secret-v1".to_string()));
+        assert_eq!(updated.name, "Renamed GPU");
+    }
+
+    #[test]
+    fn deleting_profile_cascades_its_forward_rules() {
+        let conn = memory_conn();
+        let profile = insert_profile(&conn, &profile_req(), None).expect("profile inserts");
+        insert_forward_rule(&conn, &profile.id, &rule_req()).expect("rule inserts");
+
+        delete_profile(&conn, &profile.id).expect("profile deletes");
+
+        let rules = get_forward_rules(&conn, &profile.id).expect("rules can be queried");
+        assert!(rules.is_empty());
+    }
 }

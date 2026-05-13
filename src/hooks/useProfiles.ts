@@ -19,9 +19,9 @@ export function useProfiles() {
 
   const refresh = useCallback(async () => {
     try {
-      setError(null);
       const data = await api.getProfiles();
       setProfiles(data);
+      setError(null);
     } catch (err) {
       setError(String(err));
     } finally {
@@ -30,7 +30,11 @@ export function useProfiles() {
   }, []);
 
   useEffect(() => {
-    refresh();
+    const timeoutId = window.setTimeout(() => {
+      void refresh();
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
   }, [refresh]);
 
   // ── CRUD operations ────────────────────────────────

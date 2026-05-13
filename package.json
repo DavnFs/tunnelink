@@ -1,13 +1,16 @@
 {
   "name": "tunnelink",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tauri:dev": "cargo tauri dev",
+    "tauri:build": "cargo tauri build",
+    "tauri:build:no-bundle": "cargo tauri build --no-bundle"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",

@@ -1,5 +1,5 @@
 import { X, CheckCircle, AlertCircle, Info } from "lucide-react";
-import { useToastContext } from "./ToastProvider";
+import { useToastContext } from "./toastContext";
 
 export default function ToastContainer() {
   const { toasts, removeToast } = useToastContext();

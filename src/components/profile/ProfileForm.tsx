@@ -6,7 +6,6 @@ import type {
   UpdateProfileRequest,
   AuthMethod,
   CreateForwardRuleRequest,
-  ForwardKind,
 } from "../../types";
 
 interface ProfileFormProps {
@@ -40,7 +39,6 @@ export default function ProfileForm({
   // ── Add Rule form state ──────────────────────────
   const [showRuleForm, setShowRuleForm] = useState(false);
   const [ruleLabel, setRuleLabel] = useState("");
-  const [ruleKind, setRuleKind] = useState<ForwardKind>("Local");
   const [ruleLocalPort, setRuleLocalPort] = useState(8888);
   const [ruleRemoteHost, setRuleRemoteHost] = useState("localhost");
   const [ruleRemotePort, setRuleRemotePort] = useState(8888);
@@ -105,7 +103,7 @@ export default function ProfileForm({
     try {
       await onAddRule(profile.id, {
         label: ruleLabel.trim(),
-        kind: ruleKind,
+        kind: "Local",
         local_port: ruleLocalPort,
         remote_host: ruleRemoteHost.trim() || "localhost",
         remote_port: ruleRemotePort,
@@ -413,17 +411,12 @@ export default function ProfileForm({
                     </div>
                     <div style={{ width: 90 }}>
                       <label style={labelStyle}>Type</label>
-                      <select
+                      <input
                         style={inputStyle}
-                        value={ruleKind}
-                        onChange={(e) =>
-                          setRuleKind(e.target.value as ForwardKind)
-                        }
-                      >
-                        <option value="Local">Local</option>
-                        <option value="Remote">Remote</option>
-                        <option value="Dynamic">Dynamic</option>
-                      </select>
+                        value="Local"
+                        readOnly
+                        title="Remote and Dynamic forwarding are not implemented in the MVP"
+                      />
                     </div>
                   </div>
 

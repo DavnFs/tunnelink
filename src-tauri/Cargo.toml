@@ -1,8 +1,8 @@
 [package]
-name = "app"
+name = "tunnelink"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "TunneLink SSH and port forward manager"
+authors = ["Davin Fausta"]
 license = ""
 repository = ""
 edition = "2021"

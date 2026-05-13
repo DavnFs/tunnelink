@@ -1,9 +1,9 @@
-use tauri::State;
-use crate::models::TunnelStatus;
 use crate::commands::profile::AppState;
-use crate::ssh::manager::TunnelManager;
-use crate::ssh::connection::start_ssh_session;
 use crate::db;
+use crate::models::TunnelStatus;
+use crate::ssh::connection::start_ssh_session;
+use crate::ssh::manager::TunnelManager;
+use tauri::State;
 
 #[tauri::command]
 pub async fn start_tunnel(
@@ -18,7 +18,7 @@ pub async fn start_tunnel(
 
     let conn = state.db.lock().map_err(|e| e.to_string())?;
     let mut profile = db::get_profile_by_id(&conn, &profile_id)?;
-    
+
     // Decrypt password if it exists
     if let Some(enc_pwd) = profile.password_enc.take() {
         let dec_pwd = state.crypto.decrypt(&enc_pwd)?;
@@ -35,10 +35,7 @@ pub async fn start_tunnel(
 }
 
 #[tauri::command]
-pub fn stop_tunnel(
-    profile_id: String,
-    manager: State<'_, TunnelManager>,
-) -> Result<(), String> {
+pub fn stop_tunnel(profile_id: String, manager: State<'_, TunnelManager>) -> Result<(), String> {
     manager.stop(&profile_id)
 }
 

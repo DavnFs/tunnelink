@@ -14,9 +14,16 @@ pub async fn start_local_forward(
     _profile_id: String,
 ) -> Result<(), String> {
     let bind_addr = format!("127.0.0.1:{}", rule.local_port);
-    let listener = TcpListener::bind(&bind_addr).await.map_err(|e| format!("Failed to bind local port {}: {}", rule.local_port, e))?;
+    let listener = TcpListener::bind(&bind_addr)
+        .await
+        .map_err(|e| format!("Failed to bind local port {}: {}", rule.local_port, e))?;
 
-    log::info!("Started local forward on {} -> {}:{}", bind_addr, rule.remote_host, rule.remote_port);
+    log::info!(
+        "Started local forward on {} -> {}:{}",
+        bind_addr,
+        rule.remote_host,
+        rule.remote_port
+    );
 
     loop {
         tokio::select! {
@@ -30,7 +37,7 @@ pub async fn start_local_forward(
                         let ssh_handle_clone = ssh_handle.clone();
                         let remote_host = rule.remote_host.clone();
                         let remote_port = rule.remote_port;
-                        
+
                         tokio::spawn(async move {
                             let channel_res = ssh_handle_clone.lock().await.channel_open_direct_tcpip(remote_host.clone(), remote_port as u32, "localhost", 0).await;
                             match channel_res {
@@ -38,7 +45,7 @@ pub async fn start_local_forward(
                                     // Manually implement bidirectional copy instead of tokio::io::copy_bidirectional
                                     // because russh's Channel stream handling requires it
                                     let mut local_buf = [0u8; 8192];
-                                    
+
                                     loop {
                                         tokio::select! {
                                             // Read from local, write to SSH

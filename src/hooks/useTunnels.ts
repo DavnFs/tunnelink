@@ -39,12 +39,12 @@ export function useTunnels() {
       });
     };
 
-    setupListener();
+    void setupListener();
 
     return () => {
       if (unlisten) unlisten();
     };
-  }, []);
+  }, [toast]);
 
   const startTunnel = useCallback(async (profileId: string) => {
     try {
@@ -52,7 +52,7 @@ export function useTunnels() {
     } catch (err) {
       toast.error(`Failed to start tunnel: ${err}`);
     }
-  }, []);
+  }, [toast]);
 
   const stopTunnel = useCallback(async (profileId: string) => {
     try {
@@ -60,7 +60,7 @@ export function useTunnels() {
     } catch (err) {
       toast.error(`Failed to stop tunnel: ${err}`);
     }
-  }, []);
+  }, [toast]);
 
   return {
     statuses,

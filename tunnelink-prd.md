@@ -410,11 +410,11 @@ Decorations:    true (native title bar)
 
 ### Sprint 4 (Minggu 4): Release
 - [x] Import/export profil
-- [ ] Cross-compile setup (cargo-xwin)
-- [ ] GitHub Actions CI/CD
+- [x] Cross-compile setup (cargo-xwin docs)
+- [x] GitHub Actions CI/CD
 - [ ] Testing di Windows
 - [ ] Packaging: .AppImage, .deb, .msi, .exe
-- [ ] README & user documentation
+- [x] README & user documentation
 
 ---
 
@@ -438,7 +438,8 @@ Setiap fitur dianggap selesai jika:
 | 2026-05-09 | Sprint 1 Selesai: Enkripsi AES-GCM, UI Sidebar, Profile Form, dan React/Tauri wiring selesai |
 | 2026-05-09 | Sprint 3 Selesai: System Tray, Custom Toasts, Settings (Dark/Light mode), dan Mock Status UI |
 | 2026-05-09 | Sprint 2 Selesai: Koneksi SSH native via `russh`, async Task Management via `tokio`, Local Port Forwarding, dan real-time UI React sync. |
-| Next | Sprint 4: Release & Packaging (Cross-compile, CI/CD, Documentation) |
+| 2026-05-13 | Release scaffolding: lint fixes, focused Rust tests, Tauri dialog/fs capabilities, CI workflow, README docs, and MVP Local-only rule creation. |
+| Next | Run tagged CI release, validate Linux bundles, and smoke-test Windows `.msi`/`.exe`. |
 
 ---
 
@@ -468,4 +469,4 @@ Setiap fitur dianggap selesai jika:
 - SSH Keys: User-specified path, not copied
 
 ### Next Immediate Task
-Implementasi enkripsi AES-256-GCM di `src-tauri/src/commands/crypto.rs`
+Run release packaging from a `v0.1.0` tag, validate Linux artifacts, and smoke-test the Windows installer on Windows.
