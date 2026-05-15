@@ -127,11 +127,18 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
+Manual `workflow_dispatch` runs upload installers as Actions artifacts only. Tag runs also publish those installers to the GitHub Release for the tag.
+
 Artifacts are uploaded from:
 
 ```text
 src-tauri/target/release/bundle/
 ```
+
+Expected release assets:
+
+- Linux: `.deb`
+- Windows: `.msi` and NSIS setup `.exe`
 
 For a Linux-to-Windows Rust cross-check with `cargo-xwin`:
 
