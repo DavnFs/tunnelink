@@ -6,39 +6,29 @@ interface Tab {
   id: DashboardTabId;
   label: string;
   icon: ReactNode;
-  disabled: boolean;
-  title?: string;
 }
 
 interface TabBarProps {
   activeTab: DashboardTabId;
-  terminalEnabled: boolean;
   onChange: (tab: DashboardTabId) => void;
 }
 
-const filesDisabledTitle = "Files will be available in the SFTP milestone";
-
-export default function TabBar({ activeTab, terminalEnabled, onChange }: TabBarProps) {
+export default function TabBar({ activeTab, onChange }: TabBarProps) {
   const tabs: Tab[] = [
-    {
-      id: "tunnels",
-      label: "Tunnels",
-      icon: <ArrowRightLeft size={15} />,
-      disabled: false,
-    },
     {
       id: "terminal",
       label: "Terminal",
       icon: <Terminal size={15} />,
-      disabled: !terminalEnabled,
-      title: terminalEnabled ? undefined : "Connect tunnel first to use Terminal",
+    },
+    {
+      id: "tunnels",
+      label: "Tunnels",
+      icon: <ArrowRightLeft size={15} />,
     },
     {
       id: "files",
       label: "Files",
       icon: <Folder size={15} />,
-      disabled: true,
-      title: filesDisabledTitle,
     },
   ];
 
@@ -59,10 +49,7 @@ export default function TabBar({ activeTab, terminalEnabled, onChange }: TabBarP
           <button
             key={tab.id}
             type="button"
-            disabled={tab.disabled}
             aria-current={isActive ? "page" : undefined}
-            aria-disabled={tab.disabled}
-            title={tab.title}
             onClick={() => onChange(tab.id)}
             style={{
               display: "flex",
@@ -71,24 +58,19 @@ export default function TabBar({ activeTab, terminalEnabled, onChange }: TabBarP
               minHeight: 44,
               padding: "0 14px",
               borderBottom: `2px solid ${isActive ? "var(--primary)" : "transparent"}`,
-              color: isActive
-                ? "var(--text)"
-                : tab.disabled
-                  ? "var(--text-dim)"
-                  : "var(--text-muted)",
-              cursor: tab.disabled ? "not-allowed" : "pointer",
+              color: isActive ? "var(--text)" : "var(--text-muted)",
+              cursor: "pointer",
               fontSize: 13,
               fontWeight: isActive ? 600 : 500,
-              opacity: tab.disabled ? 0.55 : 1,
             }}
             onMouseEnter={(e) => {
-              if (!tab.disabled && !isActive) {
+              if (!isActive) {
                 e.currentTarget.style.color = "var(--text)";
                 e.currentTarget.style.background = "var(--surface-hover)";
               }
             }}
             onMouseLeave={(e) => {
-              if (!tab.disabled && !isActive) {
+              if (!isActive) {
                 e.currentTarget.style.color = "var(--text-muted)";
                 e.currentTarget.style.background = "transparent";
               }

@@ -1,11 +1,13 @@
-import { useEffect } from "react";
-import { Edit2, Key, Lock, Network, Server, Trash2 } from "lucide-react";
+import { Edit2, Key, Loader2, Lock, Network, Play, Server, Square, Trash2 } from "lucide-react";
 import type { ConnectionProfile, CreateForwardRuleRequest } from "../../types";
 import type { TunnelStatus } from "../../hooks/useTunnels";
 import { useTabs } from "../../hooks/useTabs";
 import TabBar from "./TabBar";
 import TunnelTab from "../tunnel/TunnelTab";
 import TerminalTab from "../terminal/TerminalTab";
+import TerminalPlaceholder from "../terminal/TerminalPlaceholder";
+import FilesTab from "../sftp/FilesTab";
+import FilesPlaceholder from "../sftp/FilesPlaceholder";
 
 interface MainContentProps {
   profile: ConnectionProfile | null;
@@ -38,13 +40,8 @@ export default function MainContent({
   const { activeTab, setActiveTab } = useTabs(profile?.id);
   const currentState = status?.state || "Disconnected";
   const statusClass = statusCssMap[currentState] || "disconnected";
-  const terminalEnabled = currentState === "Connected";
-
-  useEffect(() => {
-    if (activeTab === "terminal" && !terminalEnabled) {
-      setActiveTab("tunnels");
-    }
-  }, [activeTab, setActiveTab, terminalEnabled]);
+  const isConnected = currentState === "Connected";
+  const isConnecting = currentState === "Connecting";
 
   if (!profile) {
     return (
@@ -135,6 +132,40 @@ export default function MainContent({
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             <button
               type="button"
+              onClick={isConnected ? onStopTunnel : onStartTunnel}
+              disabled={isConnecting}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "8px 16px",
+                borderRadius: "var(--radius)",
+                background: isConnected ? "var(--error)" : isConnecting ? "var(--warning)" : "var(--success)",
+                color: "#fff",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: isConnecting ? "wait" : "pointer",
+              }}
+            >
+              {isConnected ? (
+                <>
+                  <Square size={14} fill="currentColor" />
+                  Disconnect
+                </>
+              ) : isConnecting ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  <Play size={14} fill="currentColor" />
+                  Connect
+                </>
+              )}
+            </button>
+            <button
+              type="button"
               onClick={onEdit}
               style={{
                 display: "flex",
@@ -188,20 +219,31 @@ export default function MainContent({
 
       <TabBar
         activeTab={activeTab}
-        terminalEnabled={terminalEnabled}
         onChange={setActiveTab}
       />
 
-      {activeTab === "terminal" && terminalEnabled ? (
+      {activeTab === "terminal" && isConnected ? (
         <TerminalTab profile={profile} active={activeTab === "terminal"} />
+      ) : activeTab === "terminal" ? (
+        <TerminalPlaceholder
+          profile={profile}
+          isConnecting={isConnecting}
+          onConnect={onStartTunnel}
+        />
+      ) : activeTab === "files" && isConnected ? (
+        <FilesTab profile={profile} active={activeTab === "files"} />
+      ) : activeTab === "files" ? (
+        <FilesPlaceholder
+          profile={profile}
+          isConnecting={isConnecting}
+          onConnect={onStartTunnel}
+        />
       ) : (
         <TunnelTab
           profile={profile}
           status={status}
           onAddRule={onAddRule}
           onRemoveRule={onRemoveRule}
-          onStartTunnel={onStartTunnel}
-          onStopTunnel={onStopTunnel}
         />
       )}
     </main>

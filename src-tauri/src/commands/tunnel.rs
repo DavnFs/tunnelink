@@ -3,6 +3,7 @@ use crate::db;
 use crate::models::TunnelStatus;
 use crate::ssh::connection::start_ssh_session;
 use crate::ssh::manager::TunnelManager;
+use crate::ssh::sftp_pool::SftpManager;
 use crate::ssh::shell::ShellManager;
 use tauri::State;
 
@@ -36,12 +37,14 @@ pub async fn start_tunnel(
 }
 
 #[tauri::command]
-pub fn stop_tunnel(
+pub async fn stop_tunnel(
     profile_id: String,
     manager: State<'_, TunnelManager>,
     shell_manager: State<'_, ShellManager>,
+    sftp_manager: State<'_, SftpManager>,
 ) -> Result<(), String> {
     shell_manager.close_by_profile(&profile_id);
+    sftp_manager.close_by_profile(&profile_id).await;
     manager.stop(&profile_id)
 }
 

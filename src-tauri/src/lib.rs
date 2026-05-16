@@ -13,6 +13,7 @@ use tauri::{
 };
 
 use crate::ssh::manager::TunnelManager;
+use crate::ssh::sftp_pool::SftpManager;
 use crate::ssh::shell::ShellManager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -31,6 +32,7 @@ pub fn run() {
 
     let tunnel_manager = TunnelManager::new();
     let shell_manager = ShellManager::new();
+    let sftp_manager = SftpManager::new();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -38,6 +40,7 @@ pub fn run() {
         .manage(state)
         .manage(tunnel_manager)
         .manage(shell_manager)
+        .manage(sftp_manager)
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -110,6 +113,12 @@ pub fn run() {
             commands::send_terminal_input,
             commands::resize_terminal,
             commands::close_terminal,
+            commands::sftp_list_dir,
+            commands::sftp_upload,
+            commands::sftp_download,
+            commands::sftp_delete,
+            commands::sftp_rename,
+            commands::sftp_mkdir,
             commands::export_profiles_json,
             commands::import_profiles_json,
         ])

@@ -57,6 +57,38 @@ export interface TerminalStatusEvent {
   message: string | null;
 }
 
+export type SftpFileKind = "directory" | "file" | "symlink";
+export type SftpTransferDirection = "upload" | "download";
+export type SftpTransferState = "started" | "progress" | "completed";
+
+export interface SftpFileEntry {
+  name: string;
+  path: string;
+  kind: SftpFileKind;
+  size: number;
+  modified: number | null;
+  permissions: number | null;
+}
+
+export interface SftpListResponse {
+  path: string;
+  entries: SftpFileEntry[];
+}
+
+export interface SftpTransferEvent {
+  profile_id: string;
+  direction: SftpTransferDirection;
+  local_path: string;
+  remote_path: string;
+  transferred: number;
+  total: number;
+  state: SftpTransferState;
+}
+
+export interface SftpDownloadResult {
+  local_path: string;
+}
+
 // ── Request DTOs ───────────────────────────────────────
 
 export interface CreateProfileRequest {

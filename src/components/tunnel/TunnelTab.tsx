@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Loader2, Plus, Play, Square } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { ConnectionProfile, CreateForwardRuleRequest } from "../../types";
 import type { TunnelStatus } from "../../hooks/useTunnels";
 import ForwardRuleCard from "./ForwardRuleCard";
@@ -10,8 +10,6 @@ interface TunnelTabProps {
   status?: TunnelStatus;
   onAddRule: (profileId: string, rule: CreateForwardRuleRequest) => Promise<void>;
   onRemoveRule: (ruleId: string) => void;
-  onStartTunnel: () => void;
-  onStopTunnel: () => void;
 }
 
 export default function TunnelTab({
@@ -19,13 +17,8 @@ export default function TunnelTab({
   status,
   onAddRule,
   onRemoveRule,
-  onStartTunnel,
-  onStopTunnel,
 }: TunnelTabProps) {
   const [showRuleForm, setShowRuleForm] = useState(false);
-  const currentState = status?.state || "Disconnected";
-  const isConnected = currentState === "Connected";
-  const isConnecting = currentState === "Connecting";
   const activeRuleIds = useMemo(
     () => new Set(status?.active_rules.map((rule) => rule.id) ?? []),
     [status?.active_rules]
@@ -46,43 +39,6 @@ export default function TunnelTab({
         gap: 24,
       }}
     >
-      <button
-        type="button"
-        onClick={isConnected ? onStopTunnel : onStartTunnel}
-        disabled={isConnecting}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-          padding: "12px 24px",
-          borderRadius: "var(--radius)",
-          background: isConnected ? "var(--error)" : isConnecting ? "var(--warning)" : "var(--success)",
-          color: "#fff",
-          fontSize: 14,
-          fontWeight: 600,
-          width: "100%",
-          cursor: isConnecting ? "wait" : "pointer",
-        }}
-      >
-        {isConnected ? (
-          <>
-            <Square size={16} fill="currentColor" />
-            Disconnect Tunnel
-          </>
-        ) : isConnecting ? (
-          <>
-            <Loader2 size={16} className="animate-spin" />
-            Connecting...
-          </>
-        ) : (
-          <>
-            <Play size={16} fill="currentColor" />
-            Connect All Rules
-          </>
-        )}
-      </button>
-
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         <div
           style={{

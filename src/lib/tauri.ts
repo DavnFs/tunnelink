@@ -7,6 +7,8 @@ import type {
   CreateForwardRuleRequest,
   TunnelStatus,
   TerminalSessionInfo,
+  SftpDownloadResult,
+  SftpListResponse,
 } from "../types";
 
 // ── Profile API ────────────────────────────────────────
@@ -82,4 +84,56 @@ export async function resizeTerminal(
 
 export async function closeTerminal(sessionId: string): Promise<void> {
   return invoke<void>("close_terminal", { sessionId });
+}
+
+// ── SFTP API ──────────────────────────────────────────
+
+export async function sftpListDir(
+  profileId: string,
+  remotePath: string
+): Promise<SftpListResponse> {
+  return invoke<SftpListResponse>("sftp_list_dir", { profileId, remotePath });
+}
+
+export async function sftpMkdir(
+  profileId: string,
+  remotePath: string
+): Promise<void> {
+  return invoke<void>("sftp_mkdir", { profileId, remotePath });
+}
+
+export async function sftpDelete(
+  profileId: string,
+  remotePath: string,
+  isDir: boolean
+): Promise<void> {
+  return invoke<void>("sftp_delete", { profileId, remotePath, isDir });
+}
+
+export async function sftpRename(
+  profileId: string,
+  oldPath: string,
+  newPath: string
+): Promise<void> {
+  return invoke<void>("sftp_rename", { profileId, oldPath, newPath });
+}
+
+export async function sftpUpload(
+  profileId: string,
+  localPath: string,
+  remotePath: string
+): Promise<void> {
+  return invoke<void>("sftp_upload", { profileId, localPath, remotePath });
+}
+
+export async function sftpDownload(
+  profileId: string,
+  remotePath: string,
+  localDir: string
+): Promise<SftpDownloadResult> {
+  return invoke<SftpDownloadResult>("sftp_download", {
+    profileId,
+    remotePath,
+    localDir,
+  });
 }

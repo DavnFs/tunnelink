@@ -1,7 +1,8 @@
-import { Server, Plus, Settings, Wifi } from "lucide-react";
+import { Server, Plus, Settings } from "lucide-react";
 import type { ConnectionProfile } from "../../types";
 import type { TunnelStatus } from "../../hooks/useTunnels";
 import ProfileCard from "../profile/ProfileCard";
+import logo from "../../assets/logo.png";
 
 interface SidebarProps {
   profiles: ConnectionProfile[];
@@ -51,13 +52,22 @@ export default function Sidebar({
             width: 32,
             height: 32,
             borderRadius: "var(--radius)",
-            background: "var(--primary-muted)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            background: "#07111d",
+            border: "1px solid var(--border)",
+            overflow: "hidden",
+            flexShrink: 0,
           }}
         >
-          <Wifi size={16} color="var(--primary)" />
+          <img
+            src={logo}
+            alt=""
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "block",
+              objectFit: "cover",
+            }}
+          />
         </div>
         <div>
           <h1
