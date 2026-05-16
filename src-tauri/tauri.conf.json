@@ -27,6 +27,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "icon": [
       "icons/32x32.png",
@@ -37,6 +38,17 @@
     ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IENBMjZERjQ5MDA4NzQ2REEKUldUYVJvY0FTZDhteXJNc3FTU2tLN1ZiaHhCaVFBTGxnWEQ1U2ZMR08ySFA5dTQ4ckhPVGdxOXIK",
+      "endpoints": [
+        "https://github.com/davinfausta/tunnelink/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
     }
   }
 }

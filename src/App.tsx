@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "./components/layout/Sidebar";
 import MainContent from "./components/layout/MainContent";
 import Settings from "./components/layout/Settings";
@@ -8,6 +8,7 @@ import ToastContainer from "./components/ui/Toast";
 import { useToast } from "./hooks/useToast";
 import { useProfiles } from "./hooks/useProfiles";
 import { useTunnels } from "./hooks/useTunnels";
+import { checkForUpdates } from "./lib/updater";
 import type {
   CreateForwardRuleRequest,
   CreateProfileRequest,
@@ -138,6 +139,14 @@ function AppContent() {
 }
 
 export default function App() {
+  useEffect(() => {
+    // Auto-check for updates silently, 3 seconds after app starts
+    const timer = setTimeout(() => {
+      checkForUpdates(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <ToastProvider>
       <AppContent />

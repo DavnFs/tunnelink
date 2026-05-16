@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { Moon, Sun, Monitor, Download, Upload } from "lucide-react";
+import { Moon, Sun, Monitor, Download, Upload, RefreshCw } from "lucide-react";
 import { invoke } from "@tauri-apps/api/core";
+import { getVersion } from "@tauri-apps/api/app";
 import { save, open } from "@tauri-apps/plugin-dialog";
 import { writeTextFile, readTextFile } from "@tauri-apps/plugin-fs";
 import { useToast } from "../../hooks/useToast";
+import { checkForUpdates } from "../../lib/updater";
 
 interface SettingsProps {
   onImportSuccess?: () => void;
@@ -35,10 +37,12 @@ function applyTheme(theme: Theme) {
 
 export default function Settings({ onImportSuccess }: SettingsProps) {
   const [theme, setTheme] = useState<Theme>(getStoredTheme);
+  const [appVersion, setAppVersion] = useState<string>("...");
   const toast = useToast();
 
   useEffect(() => {
     applyTheme(theme);
+    getVersion().then(setAppVersion).catch(console.error);
   }, [theme]);
 
   const handleThemeChange = (newTheme: Theme) => {
@@ -250,6 +254,50 @@ export default function Settings({ onImportSuccess }: SettingsProps) {
               Import Profiles
             </button>
           </div>
+        </div>
+      </section>
+
+      <section style={{ maxWidth: 600 }}>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 16 }}>
+          App Updates
+        </h2>
+
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--radius-lg)",
+            padding: 20,
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <p style={{ fontSize: 13, color: "var(--text-muted)", margin: 0 }}>
+              Current Version: <strong>v{appVersion}</strong>
+            </p>
+          </div>
+          
+          <button
+            onClick={() => checkForUpdates(false)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              padding: "10px 16px",
+              borderRadius: "var(--radius)",
+              border: "1px solid var(--border)",
+              background: "var(--bg)",
+              color: "var(--text)",
+              fontSize: 13,
+              fontWeight: 500,
+              width: "100%",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "var(--surface-hover)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "var(--bg)"}
+          >
+            <RefreshCw size={16} />
+            Check for Updates
+          </button>
         </div>
       </section>
     </main>

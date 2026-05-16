@@ -37,7 +37,7 @@ Instead of typing the command manually every time, TunneLink lets you save the S
 * Show tunnel status changes in the React UI through Tauri events.
 * Dark, light, and system theme selection.
 * System tray show/quit behavior.
-* Linux and Windows build workflow through GitHub Actions.
+* Linux, Windows, and Android build workflow through GitHub Actions.
 
 ### MVP Limitations
 
@@ -45,7 +45,7 @@ Instead of typing the command manually every time, TunneLink lets you save the S
 * Dynamic/SOCKS forwarding (`-D`) is intentionally not exposed yet.
 * The backend currently focuses on Local forwarding (`-L`).
 * SSH private keys with passphrases are not supported yet.
-* Windows packages are built in CI, but must still be smoke-tested on a real Windows machine before release.
+* Windows and Android packages are built in CI, but must still be smoke-tested on real platforms before release.
 * TunneLink is currently a local desktop SSH client, not a public SSH server or public tunneling platform.
 
 ## Tech Stack
