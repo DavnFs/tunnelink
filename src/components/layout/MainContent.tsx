@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { Edit2, Key, Lock, Network, Server, Trash2 } from "lucide-react";
 import type { ConnectionProfile, CreateForwardRuleRequest } from "../../types";
 import type { TunnelStatus } from "../../hooks/useTunnels";
 import { useTabs } from "../../hooks/useTabs";
 import TabBar from "./TabBar";
 import TunnelTab from "../tunnel/TunnelTab";
+import TerminalTab from "../terminal/TerminalTab";
 
 interface MainContentProps {
   profile: ConnectionProfile | null;
@@ -36,6 +38,13 @@ export default function MainContent({
   const { activeTab, setActiveTab } = useTabs(profile?.id);
   const currentState = status?.state || "Disconnected";
   const statusClass = statusCssMap[currentState] || "disconnected";
+  const terminalEnabled = currentState === "Connected";
+
+  useEffect(() => {
+    if (activeTab === "terminal" && !terminalEnabled) {
+      setActiveTab("tunnels");
+    }
+  }, [activeTab, setActiveTab, terminalEnabled]);
 
   if (!profile) {
     return (
@@ -177,16 +186,24 @@ export default function MainContent({
         </div>
       </div>
 
-      <TabBar activeTab={activeTab} onChange={setActiveTab} />
-
-      <TunnelTab
-        profile={profile}
-        status={status}
-        onAddRule={onAddRule}
-        onRemoveRule={onRemoveRule}
-        onStartTunnel={onStartTunnel}
-        onStopTunnel={onStopTunnel}
+      <TabBar
+        activeTab={activeTab}
+        terminalEnabled={terminalEnabled}
+        onChange={setActiveTab}
       />
+
+      {activeTab === "terminal" && terminalEnabled ? (
+        <TerminalTab profile={profile} active={activeTab === "terminal"} />
+      ) : (
+        <TunnelTab
+          profile={profile}
+          status={status}
+          onAddRule={onAddRule}
+          onRemoveRule={onRemoveRule}
+          onStartTunnel={onStartTunnel}
+          onStopTunnel={onStopTunnel}
+        />
+      )}
     </main>
   );
 }

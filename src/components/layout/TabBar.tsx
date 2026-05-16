@@ -12,12 +12,13 @@ interface Tab {
 
 interface TabBarProps {
   activeTab: DashboardTabId;
+  terminalEnabled: boolean;
   onChange: (tab: DashboardTabId) => void;
 }
 
-const disabledTitle = "Coming in the next milestone";
+const filesDisabledTitle = "Files will be available in the SFTP milestone";
 
-export default function TabBar({ activeTab, onChange }: TabBarProps) {
+export default function TabBar({ activeTab, terminalEnabled, onChange }: TabBarProps) {
   const tabs: Tab[] = [
     {
       id: "tunnels",
@@ -29,15 +30,15 @@ export default function TabBar({ activeTab, onChange }: TabBarProps) {
       id: "terminal",
       label: "Terminal",
       icon: <Terminal size={15} />,
-      disabled: true,
-      title: disabledTitle,
+      disabled: !terminalEnabled,
+      title: terminalEnabled ? undefined : "Connect tunnel first to use Terminal",
     },
     {
       id: "files",
       label: "Files",
       icon: <Folder size={15} />,
       disabled: true,
-      title: disabledTitle,
+      title: filesDisabledTitle,
     },
   ];
 

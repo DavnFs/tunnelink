@@ -13,6 +13,7 @@ use tauri::{
 };
 
 use crate::ssh::manager::TunnelManager;
+use crate::ssh::shell::ShellManager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -29,12 +30,14 @@ pub fn run() {
     };
 
     let tunnel_manager = TunnelManager::new();
+    let shell_manager = ShellManager::new();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .manage(state)
         .manage(tunnel_manager)
+        .manage(shell_manager)
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -103,6 +106,10 @@ pub fn run() {
             commands::get_tunnel_statuses,
             commands::start_tunnel,
             commands::stop_tunnel,
+            commands::open_terminal,
+            commands::send_terminal_input,
+            commands::resize_terminal,
+            commands::close_terminal,
             commands::export_profiles_json,
             commands::import_profiles_json,
         ])

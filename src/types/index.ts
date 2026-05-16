@@ -40,6 +40,23 @@ export interface TunnelStatus {
   active_rules: ForwardRule[];
 }
 
+export type TerminalConnectionState = "idle" | "connecting" | "connected" | "closed" | "error";
+
+export interface TerminalSessionInfo {
+  session_id: string;
+}
+
+export interface TerminalOutputEvent {
+  session_id: string;
+  data: string;
+}
+
+export interface TerminalStatusEvent {
+  session_id: string;
+  state: TerminalConnectionState;
+  message: string | null;
+}
+
 // ── Request DTOs ───────────────────────────────────────
 
 export interface CreateProfileRequest {

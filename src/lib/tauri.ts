@@ -6,6 +6,7 @@ import type {
   ForwardRule,
   CreateForwardRuleRequest,
   TunnelStatus,
+  TerminalSessionInfo,
 } from "../types";
 
 // ── Profile API ────────────────────────────────────────
@@ -54,4 +55,31 @@ export async function removeForwardRule(ruleId: string): Promise<void> {
 
 export async function getTunnelStatuses(): Promise<TunnelStatus[]> {
   return invoke<TunnelStatus[]>("get_tunnel_statuses");
+}
+
+export async function openTerminal(
+  profileId: string,
+  cols: number,
+  rows: number
+): Promise<TerminalSessionInfo> {
+  return invoke<TerminalSessionInfo>("open_terminal", { profileId, cols, rows });
+}
+
+export async function sendTerminalInput(
+  sessionId: string,
+  data: string
+): Promise<void> {
+  return invoke<void>("send_terminal_input", { sessionId, data });
+}
+
+export async function resizeTerminal(
+  sessionId: string,
+  cols: number,
+  rows: number
+): Promise<void> {
+  return invoke<void>("resize_terminal", { sessionId, cols, rows });
+}
+
+export async function closeTerminal(sessionId: string): Promise<void> {
+  return invoke<void>("close_terminal", { sessionId });
 }
