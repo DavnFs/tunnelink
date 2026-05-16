@@ -3,6 +3,7 @@ import type { ForwardRule } from "../../types";
 
 interface ForwardRuleCardProps {
   rule: ForwardRule;
+  isActive?: boolean;
   onRemove: (ruleId: string) => void;
 }
 
@@ -18,7 +19,11 @@ const kindColors: Record<string, string> = {
   Dynamic: "var(--warning)",
 };
 
-export default function ForwardRuleCard({ rule, onRemove }: ForwardRuleCardProps) {
+export default function ForwardRuleCard({
+  rule,
+  isActive = false,
+  onRemove,
+}: ForwardRuleCardProps) {
   return (
     <div
       className="animate-fade-in"
@@ -39,6 +44,11 @@ export default function ForwardRuleCard({ rule, onRemove }: ForwardRuleCardProps
         (e.currentTarget.style.borderColor = "var(--border)")
       }
     >
+      <span
+        className={`status-dot status-dot--${isActive ? "connected" : "disconnected"}`}
+        title={isActive ? "Forward is active" : "Forward is not active"}
+      />
+
       {/* Kind badge */}
       <span
         style={{
@@ -102,8 +112,9 @@ export default function ForwardRuleCard({ rule, onRemove }: ForwardRuleCardProps
             fontWeight: 600,
             flexShrink: 0,
           }}
+          title="This rule starts automatically when the tunnel connects"
         >
-          AUTO
+          AUTO START
         </span>
       )}
 

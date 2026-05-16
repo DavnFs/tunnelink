@@ -83,6 +83,7 @@ function AppContent() {
       toast.success("Forward rule added");
     } catch (err) {
       toast.error(`Failed to add rule: ${err}`);
+      throw err;
     }
   };
 
@@ -117,6 +118,7 @@ function AppContent() {
           status={selectedId ? statuses[selectedId] : undefined}
           onEdit={handleEditProfile}
           onDelete={handleDeleteProfile}
+          onAddRule={handleAddRuleWrapper}
           onRemoveRule={handleRemoveRuleWrapper}
           onStartTunnel={() => selectedId && startTunnel(selectedId)}
           onStopTunnel={() => selectedId && stopTunnel(selectedId)}

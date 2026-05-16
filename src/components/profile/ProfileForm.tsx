@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Plus, Key, Lock } from "lucide-react";
+import { X, Key, Lock } from "lucide-react";
 import type {
   ConnectionProfile,
   CreateProfileRequest,
@@ -7,6 +7,7 @@ import type {
   AuthMethod,
   CreateForwardRuleRequest,
 } from "../../types";
+import ForwardRuleForm from "../tunnel/ForwardRuleForm";
 
 interface ProfileFormProps {
   profile: ConnectionProfile | null; // null = create mode
@@ -36,13 +37,7 @@ export default function ProfileForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Add Rule form state ──────────────────────────
   const [showRuleForm, setShowRuleForm] = useState(false);
-  const [ruleLabel, setRuleLabel] = useState("");
-  const [ruleLocalPort, setRuleLocalPort] = useState(8888);
-  const [ruleRemoteHost, setRuleRemoteHost] = useState("localhost");
-  const [ruleRemotePort, setRuleRemotePort] = useState(8888);
-  const [ruleAutoStart, setRuleAutoStart] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,25 +91,11 @@ export default function ProfileForm({
     }
   };
 
-  const handleAddRule = async () => {
+  const handleAddRule = async (rule: CreateForwardRuleRequest) => {
     if (!onAddRule || !profile) return;
-    if (!ruleLabel.trim()) return;
 
     try {
-      await onAddRule(profile.id, {
-        label: ruleLabel.trim(),
-        kind: "Local",
-        local_port: ruleLocalPort,
-        remote_host: ruleRemoteHost.trim() || "localhost",
-        remote_port: ruleRemotePort,
-        auto_start: ruleAutoStart,
-      });
-      // Reset form
-      setRuleLabel("");
-      setRuleLocalPort(8888);
-      setRuleRemoteHost("localhost");
-      setRuleRemotePort(8888);
-      setRuleAutoStart(false);
+      await onAddRule(profile.id, rule);
       setShowRuleForm(false);
     } catch (err) {
       setError(String(err));
@@ -381,105 +362,12 @@ export default function ProfileForm({
                     borderRadius: 4,
                   }}
                 >
-                  <Plus size={14} />
                   Add Rule
                 </button>
               </div>
 
               {showRuleForm && (
-                <div
-                  className="animate-fade-in"
-                  style={{
-                    padding: 12,
-                    background: "var(--bg)",
-                    borderRadius: "var(--radius)",
-                    border: "1px solid var(--border)",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 10,
-                  }}
-                >
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <div style={{ flex: 1 }}>
-                      <label style={labelStyle}>Label</label>
-                      <input
-                        style={inputStyle}
-                        value={ruleLabel}
-                        onChange={(e) => setRuleLabel(e.target.value)}
-                        placeholder="e.g., Jupyter Lab"
-                      />
-                    </div>
-                    <div style={{ width: 90 }}>
-                      <label style={labelStyle}>Type</label>
-                      <input
-                        style={inputStyle}
-                        value="Local"
-                        readOnly
-                        title="Remote and Dynamic forwarding are not implemented in the MVP"
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <div style={{ width: 80 }}>
-                      <label style={labelStyle}>Local Port</label>
-                      <input
-                        style={inputStyle}
-                        type="number"
-                        value={ruleLocalPort}
-                        onChange={(e) =>
-                          setRuleLocalPort(Number(e.target.value))
-                        }
-                      />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <label style={labelStyle}>Remote Host</label>
-                      <input
-                        style={inputStyle}
-                        value={ruleRemoteHost}
-                        onChange={(e) => setRuleRemoteHost(e.target.value)}
-                      />
-                    </div>
-                    <div style={{ width: 80 }}>
-                      <label style={labelStyle}>Remote Port</label>
-                      <input
-                        style={inputStyle}
-                        type="number"
-                        value={ruleRemotePort}
-                        onChange={(e) =>
-                          setRuleRemotePort(Number(e.target.value))
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <input
-                      type="checkbox"
-                      checked={ruleAutoStart}
-                      onChange={(e) => setRuleAutoStart(e.target.checked)}
-                      style={{ width: "auto" }}
-                    />
-                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
-                      Auto-start when profile connects
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleAddRule}
-                    style={{
-                      padding: "8px",
-                      background: "var(--primary-muted)",
-                      color: "var(--primary)",
-                      borderRadius: "var(--radius)",
-                      fontSize: 12,
-                      fontWeight: 500,
-                    }}
-                  >
-                    Add Rule
-                  </button>
-                </div>
+                <ForwardRuleForm onSubmit={handleAddRule} />
               )}
             </div>
           )}

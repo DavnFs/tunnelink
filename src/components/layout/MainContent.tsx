@@ -1,40 +1,42 @@
-import { Server, Play, Square, Trash2, Edit2, Key, Lock, Network, Loader2 } from "lucide-react";
-import type { ConnectionProfile } from "../../types";
+import { Edit2, Key, Lock, Network, Server, Trash2 } from "lucide-react";
+import type { ConnectionProfile, CreateForwardRuleRequest } from "../../types";
 import type { TunnelStatus } from "../../hooks/useTunnels";
-import ForwardRuleCard from "../tunnel/ForwardRuleCard";
+import { useTabs } from "../../hooks/useTabs";
+import TabBar from "./TabBar";
+import TunnelTab from "../tunnel/TunnelTab";
 
 interface MainContentProps {
   profile: ConnectionProfile | null;
   status?: TunnelStatus;
   onEdit: () => void;
   onDelete: () => void;
+  onAddRule: (profileId: string, rule: CreateForwardRuleRequest) => Promise<void>;
   onRemoveRule: (ruleId: string) => void;
   onStartTunnel: () => void;
   onStopTunnel: () => void;
 }
+
+const statusCssMap = {
+  Connected: "connected",
+  Connecting: "connecting",
+  Disconnected: "disconnected",
+  Error: "error",
+};
 
 export default function MainContent({
   profile,
   status,
   onEdit,
   onDelete,
+  onAddRule,
   onRemoveRule,
   onStartTunnel,
   onStopTunnel,
 }: MainContentProps) {
+  const { activeTab, setActiveTab } = useTabs(profile?.id);
   const currentState = status?.state || "Disconnected";
-  const isConnected = currentState === "Connected";
-  const isConnecting = currentState === "Connecting";
-  
-  // Convert Rust TunnelState to our CSS class suffix
-  const statusCssMap = {
-    Connected: "connected",
-    Connecting: "connecting",
-    Disconnected: "disconnected",
-    Error: "error",
-  };
   const statusClass = statusCssMap[currentState] || "disconnected";
-  
+
   if (!profile) {
     return (
       <main
@@ -70,19 +72,21 @@ export default function MainContent({
         overflowY: "auto",
       }}
     >
-      {/* Profile Header */}
       <div
         className="animate-slide-in"
         style={{
-          padding: "32px 40px",
-          borderBottom: "1px solid var(--border)",
+          padding: "28px 40px 24px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-              <div className={`status-dot status-dot--${statusClass}`} style={{ width: 12, height: 12 }} title={status?.error_msg || currentState} />
-              <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text)", letterSpacing: "-0.5px" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 24 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
+              <div
+                className={`status-dot status-dot--${statusClass}`}
+                style={{ width: 12, height: 12 }}
+                title={status?.error_msg || currentState}
+              />
+              <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--text)", letterSpacing: 0 }}>
                 {profile.name}
               </h1>
               {profile.tags.map((tag) => (
@@ -101,8 +105,8 @@ export default function MainContent({
                 </span>
               ))}
             </div>
-            
-            <div style={{ display: "flex", alignItems: "center", gap: 24, color: "var(--text-muted)", fontSize: 13 }}>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 24, color: "var(--text-muted)", fontSize: 13, flexWrap: "wrap" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <Server size={14} />
                 <span style={{ fontFamily: "monospace" }}>
@@ -113,14 +117,15 @@ export default function MainContent({
                 {profile.auth_method === "Key" ? <Key size={14} /> : <Lock size={14} />}
                 <span>
                   {profile.auth_method} Auth
-                  {profile.auth_method === "Key" && profile.key_path && ` (${profile.key_path.split('/').pop()})`}
+                  {profile.auth_method === "Key" && profile.key_path && ` (${profile.key_path.split("/").pop()})`}
                 </span>
               </div>
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             <button
+              type="button"
               onClick={onEdit}
               style={{
                 display: "flex",
@@ -133,13 +138,14 @@ export default function MainContent({
                 fontSize: 13,
                 fontWeight: 500,
               }}
-              onMouseEnter={(e) => e.currentTarget.style.background = "var(--surface-hover)"}
-              onMouseLeave={(e) => e.currentTarget.style.background = "var(--surface)"}
+              onMouseEnter={(event) => (event.currentTarget.style.background = "var(--surface-hover)")}
+              onMouseLeave={(event) => (event.currentTarget.style.background = "var(--surface)")}
             >
               <Edit2 size={14} />
               Edit
             </button>
             <button
+              type="button"
               onClick={onDelete}
               style={{
                 display: "flex",
@@ -153,15 +159,15 @@ export default function MainContent({
                 fontSize: 13,
                 fontWeight: 500,
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "var(--error)";
-                e.currentTarget.style.color = "#fff";
-                e.currentTarget.style.borderColor = "var(--error)";
+              onMouseEnter={(event) => {
+                event.currentTarget.style.background = "var(--error)";
+                event.currentTarget.style.color = "#fff";
+                event.currentTarget.style.borderColor = "var(--error)";
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "var(--surface)";
-                e.currentTarget.style.color = "var(--error)";
-                e.currentTarget.style.borderColor = "var(--border)";
+              onMouseLeave={(event) => {
+                event.currentTarget.style.background = "var(--surface)";
+                event.currentTarget.style.color = "var(--error)";
+                event.currentTarget.style.borderColor = "var(--border)";
               }}
             >
               <Trash2 size={14} />
@@ -169,71 +175,18 @@ export default function MainContent({
             </button>
           </div>
         </div>
-
-        {/* Master Connect Button */}
-        <button
-          onClick={isConnected ? onStopTunnel : onStartTunnel}
-          disabled={isConnecting}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            padding: "12px 24px",
-            borderRadius: "var(--radius)",
-            background: isConnected ? "var(--error)" : isConnecting ? "var(--warning)" : "var(--success)",
-            color: "#fff",
-            fontSize: 14,
-            fontWeight: 600,
-            width: "100%",
-            transition: "all 0.2s ease",
-            cursor: isConnecting ? "wait" : "pointer",
-          }}
-        >
-          {isConnected ? (
-            <>
-              <Square size={16} fill="currentColor" />
-              Disconnect Tunnel
-            </>
-          ) : isConnecting ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              Connecting...
-            </>
-          ) : (
-            <>
-              <Play size={16} fill="currentColor" />
-              Connect All Rules
-            </>
-          )}
-        </button>
       </div>
 
-      {/* Forward Rules List */}
-      <div style={{ padding: "32px 40px" }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, color: "var(--text)", marginBottom: 16 }}>
-          Port Forwarding Rules ({profile.forwards.length})
-        </h3>
-        
-        {profile.forwards.length === 0 ? (
-          <div style={{ padding: "32px", textAlign: "center", background: "var(--surface)", borderRadius: "var(--radius)", border: `1px dashed var(--border)` }}>
-            <p style={{ color: "var(--text-muted)", fontSize: 13 }}>
-              No forward rules defined for this profile.
-              <br/>Click Edit to add rules.
-            </p>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {profile.forwards.map((rule) => (
-              <ForwardRuleCard
-                key={rule.id}
-                rule={rule}
-                onRemove={onRemoveRule}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      <TabBar activeTab={activeTab} onChange={setActiveTab} />
+
+      <TunnelTab
+        profile={profile}
+        status={status}
+        onAddRule={onAddRule}
+        onRemoveRule={onRemoveRule}
+        onStartTunnel={onStartTunnel}
+        onStopTunnel={onStopTunnel}
+      />
     </main>
   );
 }
