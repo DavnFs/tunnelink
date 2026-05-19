@@ -1,6 +1,6 @@
 [package]
 name = "tunnelink"
-version = "0.1.0"
+version = "0.1.6"
 description = "TunneLink SSH and port forward manager"
 authors = ["Davin Fausta"]
 license = ""
